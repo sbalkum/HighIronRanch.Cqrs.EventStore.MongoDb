@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("HighIronRanch.Cqrs.EventStore.MongoDb")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("An event store implementation for MongoDb for github.com/sbalkum/SimpleCQRS, a fork of github.com/tyronegroves/SimpleCQRS.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Stephen Balkum")]
 [assembly: AssemblyProduct("HighIronRanch.Cqrs.EventStore.MongoDb")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCopyright("Copyright © 2015 Stephen Balkum")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

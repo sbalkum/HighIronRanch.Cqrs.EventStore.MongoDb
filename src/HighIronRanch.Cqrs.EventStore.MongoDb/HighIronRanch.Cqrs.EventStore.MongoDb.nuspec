@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+	<id>HighIronRanch.Cqrs.EventStore.MongoDb</id>
+	<version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+	<licenseUrl>https://github.com/sbalkum/HighIronRanch.Cqrs.EventStore.MongoDb/blob/master/LICENSE</licenseUrl>
+	<projectUrl>https://github.com/sbalkum/HighIronRanch.Cqrs.EventStore.MongoDb</projectUrl>
+	<requireLicenseAcceptance>false</requireLicenseAcceptance>
+	<description>$description$</description>
+	<summary>$description$</summary>
+	<copyright>$copyright$</copyright>
+  </metadata>
+  <files>
+	<file src="bin\Release\HighIronRanch.Cqrs.EventStore.MongoDb.pdb" target="lib\net45\HighIronRanch.Cqrs.EventStore.MongoDb.pdb" />
+  </files>
+</package>
