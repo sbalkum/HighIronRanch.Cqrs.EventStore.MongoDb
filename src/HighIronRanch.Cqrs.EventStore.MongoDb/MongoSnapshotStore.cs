@@ -3,7 +3,6 @@ using System.Linq;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
-using SimpleCqrs;
 using SimpleCqrs.Domain;
 using SimpleCqrs.Eventing;
 
@@ -26,21 +25,28 @@ namespace HighIronRanch.Cqrs.EventStore.MongoDb
 			return client.GetServer().GetDatabase(_database);
 		}
 
+		protected MongoCollection<Snapshot> GetSnapShotCollection()
+		{
+			return GetDatabase().GetCollection<Snapshot>("snapshots");
+		}
+
 		public Snapshot GetSnapshot(Guid aggregateRootId)
 		{
-			var database = GetDatabase();
-			var snapshotsCollection = database.GetCollection<Snapshot>("snapshots");
-			return (from snapshot in ((MongoCollection)snapshotsCollection).AsQueryable<Snapshot>()
-				where snapshot.AggregateRootId == aggregateRootId
-				select snapshot).SingleOrDefault();
+			return IOExceptionRetriable.Run(() => 
+				GetSnapShotCollection()
+					.AsQueryable<Snapshot>()
+					.SingleOrDefault(s => s.AggregateRootId == aggregateRootId)
+			);
 		}
 
 		public void SaveSnapshot<TSnapshot>(TSnapshot snapshot) where TSnapshot : Snapshot
 		{
-			var database = GetDatabase();
-			var snapshotsCollection = database.GetCollection<Snapshot>("snapshots");
 			var query = Query.EQ("_id", snapshot.AggregateRootId);
-			snapshotsCollection.Update(query, Update.Replace(snapshot), UpdateFlags.Upsert);
+
+			IOExceptionRetriable.Run(() => 
+				GetSnapShotCollection()
+					.Update(query, Update.Replace(snapshot), UpdateFlags.Upsert)
+			);
 		}
 	}
 }

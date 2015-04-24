@@ -42,59 +42,58 @@ namespace HighIronRanch.Cqrs.EventStore.MongoDb
 			return client.GetServer().GetDatabase(_database);
 		}
 
+		protected MongoCollection<DomainEvent> GetEventsCollection()
+		{
+			return GetDatabase().GetCollection<DomainEvent>("events");
+		}
+
 		public IEnumerable<DomainEvent> GetEvents(Guid aggregateRootId, int startSequence)
 		{
-			var database = GetDatabase();
-
-			var eventsCollection = database.GetCollection<DomainEvent>("events").AsQueryable<DomainEvent>();
-
-			var events = eventsCollection
+			return IOExceptionRetriable.Run(() => GetEventsCollection()
+				.AsQueryable<DomainEvent>()
 				.Where(e => e.AggregateRootId == aggregateRootId)
-				.Where(e => e.Sequence >= startSequence);
-
-			return events.ToList();
+				.Where(e => e.Sequence >= startSequence)
+				.ToList());
 		}
 
 		public void Insert(IEnumerable<DomainEvent> domainEvents)
 		{
-			var database = GetDatabase();
 			if (domainEvents.Any())
-				database.GetCollection<DomainEvent>("events").InsertBatch(domainEvents);
+			{
+				IOExceptionRetriable.Run(() => GetEventsCollection().InsertBatch(domainEvents));
+			}
 		}
 
 		public IEnumerable<DomainEvent> GetEventsByEventTypes(IEnumerable<Type> domainEventTypes)
 		{
-			var database = GetDatabase();
 			var array = domainEventTypes.Select(t => t.Name);
 			var selector = Query.In("_t", new BsonArray(array));
 
-			var cursor = database.GetCollection<DomainEvent>("events").Find(selector);
-
-			return cursor;
+			return IOExceptionRetriable.Run(() => GetEventsCollection().Find(selector));
 		}
 
 		public IEnumerable<DomainEvent> GetEventsByEventTypes(IEnumerable<Type> domainEventTypes, Guid aggregateRootId)
 		{
-			var database = GetDatabase();
 			var selector = Query.And(Query.In("_t", new BsonArray(domainEventTypes.Select(t => t.Name))),
 									Query.EQ("AggregateRootId", aggregateRootId));
-			return database.GetCollection<DomainEvent>("events").Find(selector);
+
+			return IOExceptionRetriable.Run(() => GetEventsCollection().Find(selector));
 		}
 
 		public IEnumerable<DomainEvent> GetEventsByEventTypes(IEnumerable<Type> domainEventTypes, DateTime startDate, DateTime endDate)
 		{
-			var database = GetDatabase();
 			var selector = Query.And(Query.In("_t", new BsonArray(domainEventTypes.Select(t => t.Name))),
 									Query.GTE("EventDate", startDate),
 									Query.LTE("EventDate", endDate));
-			return database.GetCollection<DomainEvent>("events").Find(selector);
+
+			return IOExceptionRetriable.Run(() => GetEventsCollection().Find(selector));
 		}
 
 		public void DeleteEventsByEventType(IEnumerable<Type> domainEventTypes)
 		{
-			var database = GetDatabase();
 			var selector = Query.In("_t", new BsonArray(domainEventTypes.Select(t => t.Name)));
-			database.GetCollection<DomainEvent>("events").Remove(selector);
+
+			IOExceptionRetriable.Run(() => GetEventsCollection().Remove(selector));
 		}
 	}
 }
