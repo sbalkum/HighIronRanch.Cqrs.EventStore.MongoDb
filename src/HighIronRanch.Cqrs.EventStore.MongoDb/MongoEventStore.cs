@@ -84,7 +84,7 @@ namespace HighIronRanch.Cqrs.EventStore.MongoDb
 		{
 			var selector = Query.And(Query.In("_t", new BsonArray(domainEventTypes.Select(t => t.Name))),
 									Query.GTE("EventDate", startDate),
-									Query.LTE("EventDate", endDate));
+									Query.LT("EventDate", endDate));
 
 			return IOExceptionRetriable.Run(() => GetEventsCollection().Find(selector));
 		}
@@ -95,5 +95,26 @@ namespace HighIronRanch.Cqrs.EventStore.MongoDb
 
 			IOExceptionRetriable.Run(() => GetEventsCollection().Remove(selector));
 		}
+
+	    public IEnumerable<Guid> GetAggregateRootIds(DateTime startTime, DateTime endTime)
+	    {
+	        var distinctIds = GetEventsCollection()
+                .AsQueryable<DomainEvent>()
+                .Where(e => e.EventDate >= startTime && e.EventDate < endTime)
+                .Select(e => e.AggregateRootId)
+                .Distinct();
+	        return distinctIds;
+	    }
+
+	    public IOrderedQueryable<DomainEvent> GetEventsByAggregateRootId(Guid aggregateRootId)
+	    {
+	        var events = GetEventsCollection()
+	            .AsQueryable<DomainEvent>()
+	            .Where(e => e.AggregateRootId == aggregateRootId)
+                .OrderBy(e => e.Sequence)
+                .ThenBy(e => e.EventDate);
+
+	        return events;
+	    } 
 	}
 }
